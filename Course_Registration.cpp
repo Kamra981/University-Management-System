@@ -4,27 +4,36 @@
 
 using namespace std;
 
-// Course Class - Sirf course ki info hold karti hai
+// Course Class with Capacity Logic
 class Course
 {
 public:
     string code;
     string name;
+    int maxCapacity;
+    int enrolledCount;
 
-    Course(string c, string n)
+    Course(string c, string n, int cap)
     {
         code = c;
         name = n;
+        maxCapacity = cap;
+        enrolledCount = 0; // Initially 0 students enrolled
+    }
+
+    bool isFull()
+    {
+        return enrolledCount >= maxCapacity;
     }
 };
 
-// Student Class - Student ki info aur uske courses
+// Student Class with Duplicate Check and Drop Course Logic
 class Student
 {
 public:
     int id;
     string name;
-    vector<Course> registeredCourses; // Course ki list
+    vector<Course *> registeredCourses; // Pointers use kar rahe hain taaki main list me update ho
 
     Student(int i, string n)
     {
@@ -32,14 +41,59 @@ public:
         name = n;
     }
 
-    // Course add karne ka logic
-    void registerCourse(Course c)
+    // 1. Check if Course is already registered (Duplicate Check)
+    bool isAlreadyRegistered(string courseCode)
     {
-        registeredCourses.push_back(c);
-        cout << "SUCCESS: " << c.name << " registered for " << name << endl;
+        for (int i = 0; i < registeredCourses.size(); i++)
+        {
+            if (registeredCourses[i]->code == courseCode)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
-    // Registered courses dekhne ka logic
+    // 2. Register Course Logic
+    void registerCourse(Course &c)
+    {
+        // Validation Check 1: Duplicate Course
+        if (isAlreadyRegistered(c.code))
+        {
+            cout << "\n[ERROR] You are ALREADY registered in " << c.name << endl;
+            return;
+        }
+
+        // Validation Check 2: Seat Capacity
+        if (c.isFull())
+        {
+            cout << "\n[ERROR] Cannot register! " << c.name << " is FULL." << endl;
+            return;
+        }
+
+        // Success Path
+        registeredCourses.push_back(&c);
+        c.enrolledCount++; // Capacity count increment
+        cout << "\n[SUCCESS] Successfully registered for " << c.name << endl;
+    }
+
+    // 3. Drop Course Logic
+    void dropCourse(string courseCode)
+    {
+        for (int i = 0; i < registeredCourses.size(); i++)
+        {
+            if (registeredCourses[i]->code == courseCode)
+            {
+                registeredCourses[i]->enrolledCount--; // Decrease enrollment count
+                cout << "\n[SUCCESS] Dropped course: " << registeredCourses[i]->name << endl;
+                registeredCourses.erase(registeredCourses.begin() + i); // Remove from list
+                return;
+            }
+        }
+        cout << "\n[ERROR] You are not enrolled in this course!" << endl;
+    }
+
+    // 4. Show Registered Courses
     void showCourses()
     {
         cout << "\n--- Courses for " << name << " (ID: " << id << ") ---" << endl;
@@ -50,70 +104,95 @@ public:
         }
         for (int i = 0; i < registeredCourses.size(); i++)
         {
-            cout << i + 1 << ". " << registeredCourses[i].code << " - " << registeredCourses[i].name << endl;
+            cout << i + 1 << ". " << registeredCourses[i]->code << " - " << registeredCourses[i]->name << endl;
         }
     }
 };
 
 int main()
 {
-    // 1. Available Courses create karna
-    Course c1("CS101", "Introduction to Programming");
-    Course c2("CS102", "Data Structures");
-    Course c3("MATH101", "Calculus");
+    // 1. Available Courses setup (Code, Name, Max Capacity)
+    vector<Course> availableCourses = {
+        Course("CS101", "Introduction to Programming", 2), // Max 2 students
+        Course("CS102", "Data Structures", 1),             // Max 1 student
+        Course("MATH101", "Calculus", 3)                   // Max 3 students
+    };
 
-    // 2. Student Create karna
+    // 2. Dummy Student Setup
     Student s1(101, "Ali");
 
     int choice;
     do
     {
-        cout << "\n===============================" << endl;
-        cout << "  SIMPLE COURSE REGISTRATION   " << endl;
-        cout << "===============================" << endl;
-        cout << "1. View Available Courses" << endl;
+        cout << "\n======================================" << endl;
+        cout << "  COURSE REGISTRATION SYSTEM (PHASE 2) " << endl;
+        cout << "======================================" << endl;
+        cout << "1. View Available Courses & Seat Status" << endl;
         cout << "2. Register for a Course" << endl;
-        cout << "3. View My Registered Courses" << endl;
-        cout << "4. Exit" << endl;
-        cout << "Enter Choice (1-4): ";
+        cout << "3. Drop a Course" << endl;
+        cout << "4. View My Registered Courses" << endl;
+        cout << "5. Exit" << endl;
+        cout << "Enter Choice (1-5): ";
         cin >> choice;
 
         if (choice == 1)
         {
             cout << "\n--- Available Courses ---" << endl;
-            cout << "1. " << c1.code << " - " << c1.name << endl;
-            cout << "2. " << c2.code << " - " << c2.name << endl;
-            cout << "3. " << c3.code << " - " << c3.name << endl;
+            for (int i = 0; i < availableCourses.size(); i++)
+            {
+                cout << i + 1 << ". " << availableCourses[i].code << " - " << availableCourses[i].name
+                     << " [Seats: " << availableCourses[i].enrolledCount << "/" << availableCourses[i].maxCapacity << "]" << endl;
+            }
         }
         else if (choice == 2)
         {
+            cout << "\n--- Choose Course to Register ---" << endl;
+            for (int i = 0; i < availableCourses.size(); i++)
+            {
+                cout << i + 1 << ". " << availableCourses[i].code << " - " << availableCourses[i].name << endl;
+            }
             int courseNum;
-            cout << "\nEnter Course Number to Register (1-3): ";
+            cout << "Enter Choice (1-" << availableCourses.size() << "): ";
             cin >> courseNum;
 
-            if (courseNum == 1)
-                s1.registerCourse(c1);
-            else if (courseNum == 2)
-                s1.registerCourse(c2);
-            else if (courseNum == 3)
-                s1.registerCourse(c3);
+            if (courseNum >= 1 && courseNum <= availableCourses.size())
+            {
+                s1.registerCourse(availableCourses[courseNum - 1]);
+            }
             else
-                cout << "Invalid Course Number!" << endl;
+            {
+                cout << "\n[ERROR] Invalid Course Choice!" << endl;
+            }
         }
         else if (choice == 3)
         {
-            s1.showCourses();
+            if (s1.registeredCourses.empty())
+            {
+                cout << "\nYou have no courses to drop." << endl;
+            }
+            else
+            {
+                s1.showCourses();
+                string codeToDrop;
+                cout << "\nEnter Course Code to Drop (e.g. CS101): ";
+                cin >> codeToDrop;
+                s1.dropCourse(codeToDrop);
+            }
         }
         else if (choice == 4)
+        {
+            s1.showCourses();
+        }
+        else if (choice == 5)
         {
             cout << "Exiting program..." << endl;
         }
         else
         {
-            cout << "Invalid Choice! Try again." << endl;
+            cout << "\n[ERROR] Invalid Choice! Try again." << endl;
         }
 
-    } while (choice != 4);
+    } while (choice != 5);
 
     return 0;
 }
