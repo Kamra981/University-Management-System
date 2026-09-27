@@ -146,7 +146,7 @@ int main()
         }
         else if (choice == 2)
         {
-            cout << "\n--- Choose Course to Register ---" << endl;
+            cout << "\n=== Choose Course to Register ===" << endl;
             for (int i = 0; i < availableCourses.size(); i++)
             {
                 cout << i + 1 << ". " << availableCourses[i].code << " - " << availableCourses[i].name << endl;
