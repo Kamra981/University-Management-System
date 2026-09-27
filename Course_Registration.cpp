@@ -1,6 +1,37 @@
 #include <iostream>
 #include <cassert>
 
+class StudentProfile
+{
+public:
+    std::string calculateGradeStatus(double gpa, int totalCredits)
+    {
+        // Bad Practice: Nested conditions and hardcoded magic numbers
+        if (gpa >= 2.0)
+        {
+            if (totalCredits >= 130)
+            {
+                return "Eligible for Graduation";
+            }
+            else
+            {
+                return "Good Standing - In Progress";
+            }
+        }
+        else
+        {
+            if (gpa < 1.5)
+            {
+                return "Academic Dismissal";
+            }
+            else
+            {
+                return "Academic Warning";
+            }
+        }
+    }
+};
+
 // Actual implementation logic
 bool canRegisterCourse(bool prerequisitePassed, bool feePaid)
 {
@@ -24,3 +55,6 @@ int main()
     test_CanRegisterCourse(); // THIS WILL PASS
     return 0;
 }
+
+#include <iostream>
+#include <string>
